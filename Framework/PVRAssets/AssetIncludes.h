@@ -6,8 +6,8 @@ functionality.
 \copyright Copyright (c) Imagination Technologies Limited.
 */
 #pragma once
-#include "PVRCore/CoreIncludes.h"
-#include "PVRCore/Interfaces.h"
+#include "PVRCore/PVRCore.h"
+#include "PVRCore/Interfaces/IAssetProvider.h"
 #include "PVRCore/Base/RefCounted.h"
 #include "PVRCore/DataStructures/IndexedArray.h"
 #include "PVRCore/DataStructures/ContiguousMap.h"
@@ -16,11 +16,3 @@ functionality.
 #include "PVRCore/IO/Asset.h"
 #include <functional>
 #include <map>
-
-namespace pvr {
-namespace assets {
-typedef ::pvr::types::VertexAttributeLayout  VertexAttributeLayout;
-typedef ::pvr::types::SamplerCreateParam SamplerCreateParam;
-
-}
-}

@@ -12,7 +12,7 @@
 #include <Windows.h>
 using std::string;
 namespace pvr{
-WindowsResourceStream::WindowsResourceStream(const string& fileName) : BufferStream(fileName)
+WindowsResourceStream::WindowsResourceStream(const std::string& fileName) : BufferStream(fileName)
 {
 	_isReadable = true;
 

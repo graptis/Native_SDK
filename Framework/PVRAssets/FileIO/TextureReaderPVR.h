@@ -11,6 +11,7 @@ PowerVR Framework and examples.
 #include "PVRCore/Texture/FileDefinesPVR.h"
 #include "PVRCore/IO/AssetReader.h"
 
+//!\cond NO_DOXYGEN
 namespace pvr {
 namespace assets {
 namespace assetReaders {
@@ -45,7 +46,7 @@ public:
 
 	/// <summary>Convert a legacy PixelFormat into a new PixelFormat</summary>
 	static bool mapLegacyEnumToNewFormat(const texture_legacy::PixelFormat legacyPixelType, PixelFormat& newPixelType,
-	                                     types::ColorSpace& newColorSpace, VariableType& newChannelType,
+	                                     ColorSpace& newColorSpace, VariableType& newChannelType,
 	                                     bool& isPremultiplied);
 private:
 	virtual bool readNextAsset(Texture& asset);
@@ -54,3 +55,4 @@ private:
 }
 }
 }
+//!\endcond

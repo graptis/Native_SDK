@@ -9,7 +9,6 @@ of an API. A useful helper for automatically selecting shader versions based on 
 #include "PVRAssets/AssetIncludes.h"
 #include "PVRCore/Interfaces/IAssetProvider.h"
 #include "PVRCore/StringFunctions.h"
-#include "PVRCore/Interfaces/IGraphicsContext.h"
 namespace pvr {
 namespace assets {
 
@@ -36,7 +35,11 @@ class ShaderFile
 	std::vector<std::pair<pvr::Api, std::string>/**/> _filenames;
 	IAssetProvider* _assetProvider;
 public:
+	/// <summary>Constructor, empty shader</summary>
 	ShaderFile() : empty_string("") {}
+	/// <summary>Construct which immediately populates the specified filename</summary>
+	/// <param name="filename">The filename to use to populate</param>
+	/// <param name="assetProvider">The assetProvider to use to get asset streams for the filename</param>
 	ShaderFile(const std::string& filename, IAssetProvider& assetProvider) : empty_string("")
 	{
 		populateValidVersions(filename, assetProvider);
@@ -59,7 +62,7 @@ public:
 
 	/// <summary>Get the file name of this shader for specific api</summary>
 	/// <param name="api">Specific api requested for this shader file</param>
-	/// <returns>Return a string of a file name for given api, else empty string if the shader is not supported for the
+	/// <returns>Return a std::string of a file name for given api, else empty std::string if the shader is not supported for the
 	/// given api</returns>
 	const std::string& getFilenameForSpecificApi(Api api)const
 	{
@@ -84,25 +87,9 @@ public:
 		return Stream::ptr_type();
 	}
 
-	/// <summary>Get a best stream for the given context</summary>
-	/// <param name="context">Specific context requested for this shader file</param>
-	/// <returns>Return stream object of this shader, else NULL object if no valid shader is found for given context
-	/// </returns>
-	/// <remarks>The return stream may not be the exact one for the given context, but the one still supported by the
-	/// context.</remarks>
-	Stream::ptr_type getBestStreamForContext(const GraphicsContext& context)const
-	{
-		auto it = std::find_if(_filenames.rbegin(), _filenames.rend(), ApiComparatorNotGreaterThan(context->getApiType()));
-		if (it != _filenames.rend()) //Will find the first filename that is not more than supported
-		{
-			return _assetProvider->getAssetStream(it->second);
-		}
-		return Stream::ptr_type();
-	}
-
 	/// <summary>Get the best shader file name for the given api</summary>
 	/// <param name="api">Specific api requested for this shader file</param>
-	/// <returns>Return a string of a file name for given api, else empty string if the shader is not supported for the
+	/// <returns>Return a std::string of a file name for given api, else empty std::string if the shader is not supported for the
 	/// given api</returns>
 	/// <remarks>The return file name may not be the exact one for the given api, but the one still supported by the
 	/// api.</remarks>
@@ -162,7 +149,7 @@ public:
 		//is found, stop. We won't bother with others.
 		std::string name, extension;
 		strings::getFileNameAndExtension(filename, name, extension);
-		for (int i = 1; i < (int)Api::Count; ++i)
+		for (int i = 1; i < (int)Api::NumApis; ++i)
 		{
 			if (strings::endsWith(name, apiCode(Api(i))))
 			{
@@ -179,9 +166,9 @@ public:
 
 		//Being here means that the filename did not have an API suffix. Which is the main case: Load everything you find.
 		//So now do the main work: Test all possible Apis...
-		for (int i = 1; i < (int)Api::Count; ++i)
+		for (int i = 1; i < (int)Api::NumApis; ++i)
 		{
-			string file1 = name + "_" + apiCode(Api(i)) + (extension.size() ? "." + extension : "");
+			std::string file1 = name + "_" + apiCode(Api(i)) + (extension.size() ? "." + extension : "");
 			if (i == (int)Api::Vulkan) { file1 += ".spv"; }
 			Stream::ptr_type str = _assetProvider->getAssetStream(file1, false);
 			if (str.get())
@@ -212,7 +199,7 @@ public:
 		}
 		if (count == 0)
 		{
-			Log(Log.Error, "ShaderFile::populateValidVersions: No valid files found for filename [%s]", filename.c_str());
+			Log(LogLevel::Error, "ShaderFile::populateValidVersions: No valid files found for filename [%s]", filename.c_str());
 		}
 		return count;
 	}

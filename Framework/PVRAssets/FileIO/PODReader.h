@@ -19,8 +19,10 @@ class PODReader : public AssetReader<Model>
 public:
 	/// <summary>Construct empty reader.</summary>
 	PODReader();
+
 	/// <summary>Construct reader from the specified stream.</summary>
-	PODReader(Stream::ptr_type assetStream) : AssetReader<Model>(assetStream) { }
+	/// <param name="assetStream">The stream to read from</param>
+	PODReader(Stream::ptr_type assetStream) : AssetReader<Model>(std::move(assetStream)) { }
 
 	/// <summary>Check if there more assets in the stream.</summary>
 	/// <returns>True if the readAsset() method can be called again to read another asset</returns>
@@ -31,6 +33,7 @@ public:
 	virtual bool canHaveMultipleAssets();
 
 	/// <summary>Check if this reader supports the particular assetStream.</summary>
+	/// <param name="assetStream">The stream to check</param>
 	/// <returns>True if this reader supports the particular assetStream</returns>
 	virtual bool isSupportedFile(Stream& assetStream);
 

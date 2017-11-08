@@ -111,7 +111,6 @@ std::string getStackTraceInfo(int skipFrames)
 	static void* base = 0;
 	static DWORD image_type = 0;
 
-	int frame_number = 0;
 	DWORD offset_from_symbol = 0;
 	IMAGEHLP_LINE64 line = { 0 };
 
@@ -122,8 +121,8 @@ std::string getStackTraceInfo(int skipFrames)
 		// Load the symbols:
 		if (!SymInitialize(process, NULL, false))
 		{
-			pvr::Log(pvr::Log.Debug, "Unable to initialize debug symbol handler."
-			         " It will be impossible to properly trace call stacks in case of API errors in command buffers.");
+			Log(LogLevel::Debug, "Unable to initialize debug symbol handler."
+			    " It will be impossible to properly trace call stacks in case of API errors in command buffers.");
 		}
 		else
 		{
@@ -166,7 +165,7 @@ std::string getStackTraceInfo(int skipFrames)
 	line.SizeOfStruct = sizeof(line);
 	int n = 0;
 
-	// Build the string:
+	// Build the std::string:
 	std::ostringstream builder;
 	do
 	{
@@ -206,9 +205,9 @@ std::string getStackTraceInfo(int skipFrames)
 	}
 	while (frame.AddrReturn.Offset != 0);
 	//return EXCEPTION_EXECUTE_HANDLER;
-	//SymCleanup(process); NO CLEANUP, SORRIES!
+	//SymCleanup(process); NO CLEANUP
 
-	// Display the string:
+	// Display the std::string:
 	return builder.str();
 #else
 	return std::string("----- Cannot get stacktrace in Release builds. ------");

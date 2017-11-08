@@ -18,9 +18,9 @@ inline ShaderType getShaderTypeFromFilename(const char* shaderName)
 	std::string file(shaderName);
 
 	size_t period = file.rfind(".");
-	if (period != string::npos)
+	if (period != std::string::npos)
 	{
-		string s = file.substr(period + 1);
+		std::string s = file.substr(period + 1);
 		std::transform(s.begin(), s.end(), s.begin(), tolower);
 		if (!s.compare("vsh")) { return ShaderType::VertexShader; }
 		if (!s.compare("vs")) { return ShaderType::VertexShader; }

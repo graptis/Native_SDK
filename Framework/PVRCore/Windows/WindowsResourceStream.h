@@ -16,7 +16,8 @@ namespace pvr {
 class WindowsResourceStream : public BufferStream
 {
 public:
-	WindowsResourceStream(const std::string& fileName);
-	WindowsResourceStream(const std::string& resourceName, const std::string& );
+	/// <summary>Constructor. Creates a new WindowsResourceStream from a Windows Embedded Resource.</summary>
+	/// <param name="resourceName">The "filename". must be the same as the identifier of the Windows Embedded Resource</param>
+	WindowsResourceStream(const std::string& resourceName);
 };
 }

@@ -12,6 +12,7 @@ namespace platform {
 /// <summary>OS specific data for windows</summary>
 struct WindowsOSData
 {
+	/// <summary>The mode that this window should be shown with (minimized, maximized etc.)</summary>
 	int cmdShow;
 
 	WindowsOSData() : cmdShow(SW_SHOW)

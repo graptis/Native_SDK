@@ -52,12 +52,6 @@
     <ClInclude Include="..\..\PVRShell.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\PVRShellNoPVRApi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\PVRShellDllImpls.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\OS\Windows\WindowsOSData.h">
       <Filter>Header Files</Filter>
     </ClInclude>

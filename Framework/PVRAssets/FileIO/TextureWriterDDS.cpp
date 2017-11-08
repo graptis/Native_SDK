@@ -32,7 +32,7 @@ bool TextureWriterDDS::writeAllAssets()
 	bool doDDS10 = false;
 
 	//DirectX 9-style DDS headers can't handle texture arrays, so if we have one of these we should use a DX10-style DDS.
-	if (_assetsToWrite[0]->getNumberOfArrayMembers() > 1)
+	if (_assetsToWrite[0]->getNumArrayMembers() > 1)
 	{
 		doDDS10 = true;
 	}
@@ -47,7 +47,7 @@ bool TextureWriterDDS::writeAllAssets()
 	ddsFileHeader.height = _assetsToWrite[0]->getHeight();
 	ddsFileHeader.width = _assetsToWrite[0]->getWidth();
 	ddsFileHeader.depth = _assetsToWrite[0]->getDepth();
-	ddsFileHeader.mipMapCount = _assetsToWrite[0]->getNumberOfMIPLevels();
+	ddsFileHeader.numMipMaps = _assetsToWrite[0]->getNumMipMapLevels();
 	ddsFileHeader.Capabilities1 = texture_dds::e_texture;
 	ddsFileHeader.Capabilities2 = 0;
 	ddsFileHeader.Capabilities3 = 0;
@@ -62,9 +62,9 @@ bool TextureWriterDDS::writeAllAssets()
 		ddsFileHeader.flags |= texture_dds::e_depth;
 		ddsFileHeader.Capabilities2 |= texture_dds::e_volume;
 	}
-	if (ddsFileHeader.mipMapCount > 1)
+	if (ddsFileHeader.numMipMaps > 1)
 	{
-		ddsFileHeader.flags |= texture_dds::e_mipMapCount;
+		ddsFileHeader.flags |= texture_dds::e_numMipMaps;
 		ddsFileHeader.Capabilities1 |= texture_dds::e_mipMaps;
 		ddsFileHeader.Capabilities1 |= texture_dds::e_complex;
 	}
@@ -78,14 +78,14 @@ bool TextureWriterDDS::writeAllAssets()
 	else
 	{
 		ddsFileHeader.flags |= texture_dds::e_pitch;
-		ddsFileHeader.pitchOrLinearSize = std::max<uint32>(1,
+		ddsFileHeader.pitchOrLinearSize = std::max<uint32_t>(1,
 		                                  (_assetsToWrite[0]->getWidth() * _assetsToWrite[0]->getBitsPerPixel() + 7) / 8);
 	}
 
 	// Proper cube map handling is a little complicated, but doable.
-	if (_assetsToWrite[0]->getNumberOfFaces() > 1)
+	if (_assetsToWrite[0]->getNumFaces() > 1)
 	{
-		if (_assetsToWrite[0]->getNumberOfFaces() > 6)
+		if (_assetsToWrite[0]->getNumFaces() > 6)
 		{
 			assertion(0 ,  "Invalid Argument");
 			return false;
@@ -96,7 +96,7 @@ bool TextureWriterDDS::writeAllAssets()
 		std::string cubeFaces = _assetsToWrite[0]->getCubeMapOrder();
 
 		// Handle the cube map's faces, setting flags for faces that are available.
-		for (uint32 face = 0; face < _assetsToWrite[0]->getNumberOfFaces(); ++face)
+		for (uint32_t face = 0; face < _assetsToWrite[0]->getNumFaces(); ++face)
 		{
 			switch (cubeFaces[face])
 			{
@@ -135,7 +135,7 @@ bool TextureWriterDDS::writeAllAssets()
 	}
 
 	// Check if a DDS file can be written without the DX10 header first, as this maintains the highest compatibility.
-	uint32 d3dFormat;
+	uint32_t d3dFormat;
 	if (doDDS10 || !_assetsToWrite[0]->getDirect3DFormat(d3dFormat))
 	{
 		// If a D3D format does not exist, attempt to write it as a DXGI format in a DX10 style header
@@ -174,18 +174,18 @@ bool TextureWriterDDS::writeAllAssets()
 		}
 
 		// Check for a cube map - only full cube maps are supported.
-		if (_assetsToWrite[0]->getNumberOfFaces() == 6)
+		if (_assetsToWrite[0]->getNumFaces() == 6)
 		{
 			ddsFileHeaderDX10.miscFlags = texture_dds::e_textureCube;
 		}
-		else if (_assetsToWrite[0]->getNumberOfFaces() != 1)
+		else if (_assetsToWrite[0]->getNumFaces() != 1)
 		{
 			assertion(0 ,  "INVALID ARGUMENT");
 			return false;
 		}
 
 		// Set the array size.
-		ddsFileHeaderDX10.arraySize = _assetsToWrite[0]->getNumberOfArrayMembers();
+		ddsFileHeaderDX10.arraySize = _assetsToWrite[0]->getNumArrayMembers();
 
 		if (notAlpha)
 		{
@@ -216,8 +216,8 @@ bool TextureWriterDDS::writeAllAssets()
 
 		setDirect3DFormatToDDSHeader(static_cast<texture_dds::D3DFormat>(d3dFormat), ddsFileHeader);
 
-		if (_assetsToWrite[0]->getPixelFormat().getPixelTypeId() == (uint64)CompressedPixelFormat::PVRTCI_4bpp_RGBA ||
-		    _assetsToWrite[0]->getPixelFormat().getPixelTypeId() == (uint64)CompressedPixelFormat::PVRTCI_2bpp_RGBA)
+		if (_assetsToWrite[0]->getPixelFormat().getPixelTypeId() == static_cast<uint64_t>(CompressedPixelFormat::PVRTCI_4bpp_RGBA) ||
+		    _assetsToWrite[0]->getPixelFormat().getPixelTypeId() == static_cast<uint64_t>(CompressedPixelFormat::PVRTCI_2bpp_RGBA))
 		{
 			ddsFileHeader.pixelFormat.flags |= texture_dds::e_alphaPixels;
 		}
@@ -241,11 +241,11 @@ bool TextureWriterDDS::writeAllAssets()
 	}
 
 	// Write the texture data
-	for (uint32 surface = 0; surface < _assetsToWrite[0]->getNumberOfArrayMembers(); ++surface)
+	for (uint32_t surface = 0; surface < _assetsToWrite[0]->getNumArrayMembers(); ++surface)
 	{
-		for (uint32 face = 0; face < _assetsToWrite[0]->getNumberOfFaces(); ++face)
+		for (uint32_t face = 0; face < _assetsToWrite[0]->getNumFaces(); ++face)
 		{
-			for (uint32 mipMapLevel = 0; mipMapLevel < _assetsToWrite[0]->getNumberOfMIPLevels(); ++mipMapLevel)
+			for (uint32_t mipMapLevel = 0; mipMapLevel < _assetsToWrite[0]->getNumMipMapLevels(); ++mipMapLevel)
 			{
 				// Write out all the data - DDS files have a different order to PVR v3 files, but are not affected by padding.
 				if (!_assetStream->write(_assetsToWrite[0]->getDataSize(mipMapLevel, false, false), 1,
@@ -259,9 +259,9 @@ bool TextureWriterDDS::writeAllAssets()
 	return true;
 }
 
-uint32 TextureWriterDDS::assetsAddedSoFar()
+uint32_t TextureWriterDDS::assetsAddedSoFar()
 {
-	return static_cast<uint32>(_assetsToWrite.size());
+	return static_cast<uint32_t>(_assetsToWrite.size());
 }
 
 bool TextureWriterDDS::supportsMultipleAssets()
@@ -527,8 +527,8 @@ bool TextureWriterDDS::writeFileHeader(const texture_dds::FileHeader& ddsFileHea
 	result = _assetStream->write(sizeof(ddsFileHeader.depth), 1, &ddsFileHeader.depth, dataWritten);
 	if (result != true || dataWritten != 1) { return result; }
 
-	// Write the mipMapCount
-	result = _assetStream->write(sizeof(ddsFileHeader.mipMapCount), 1, &ddsFileHeader.mipMapCount, dataWritten);
+	// Write the numMipMaps
+	result = _assetStream->write(sizeof(ddsFileHeader.numMipMaps), 1, &ddsFileHeader.numMipMaps, dataWritten);
 	if (result != true || dataWritten != 1) { return result; }
 
 	// Write the reserved data
@@ -617,24 +617,24 @@ bool TextureWriterDDS::writeFileHeaderDX10(const texture_dds::FileHeaderDX10& dd
 
 bool TextureWriterDDS::canWriteAsset(const Texture& asset)
 {
-	uint32 d3dFormat, dxgiFormat;
+	uint32_t d3dFormat, dxgiFormat;
 	bool notAlpha;
 	return (asset.getDirect3DFormat(d3dFormat) || asset.getDirectXGIFormat(dxgiFormat, notAlpha));
 }
 
-vector<string> TextureWriterDDS::getSupportedFileExtensions()
+vector<std::string> TextureWriterDDS::getSupportedFileExtensions()
 {
-	vector<string> extensions;
+	vector<std::string> extensions;
 	extensions.push_back("dds");
-	return vector<string>(extensions);
+	return vector<std::string>(extensions);
 }
 
-string TextureWriterDDS::getWriterName()
+std::string TextureWriterDDS::getWriterName()
 {
 	return "PowerVR Direct Draw Surface Writer";
 }
 
-string TextureWriterDDS::getWriterVersion()
+std::string TextureWriterDDS::getWriterVersion()
 {
 	return "1.0.0";
 }

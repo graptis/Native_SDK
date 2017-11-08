@@ -28,9 +28,9 @@ struct InternalOS
 };
 
 // Setup the capabilities.
-const ShellOS::Capabilities ShellOS::_capabilities = { types::Capability::Immutable, types::Capability::Immutable };
+const ShellOS::Capabilities ShellOS::_capabilities = { Capability::Immutable, Capability::Immutable };
 
-ShellOS::ShellOS(OSApplication hInstance, OSDATA osdata) : _instance(hInstance), _shell(0)
+ShellOS::ShellOS(OSApplication hInstance, OSDATA osdata) : _instance(hInstance)
 {
 	_OSImplementation = new InternalOS;
 
@@ -63,7 +63,7 @@ void ShellOS::updatePointingDeviceLocation()
 	POINT point;
 	if (GetCursorPos(&point) && ScreenToClient(_OSImplementation->hWnd, &point))
 	{
-		_shell->updatePointerPosition(PointerLocation((int16)point.x, (int16)point.y));
+		_shell->updatePointerPosition(PointerLocation(static_cast<int16_t>(point.x), static_cast<int16_t>(point.y)));
 	}
 }
 
@@ -76,7 +76,7 @@ static Keys mapKeyWparamToPvrKey(WPARAM wParam)
 //The window procedure receives and handles messages from MS Windows.
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static uint16 capturer = 0;
+	static uint16_t capturer = 0;
 #if defined(UNDER_CE)
 	Shell* theShell = reinterpret_cast<Shell*>(GetWindowLong(hWnd, GWLP_USERDATA));
 #else
@@ -107,17 +107,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return 0;
 	case WM_MOVE:
 	{
-		//if (motionhandler)
-		//{
-		//	RECT winRect;
-		//	GetWindowRect(hWnd, &winRect);
-		//	InputState state;
-		//	state.
-		//	Event e(EventTypeWindowMove);
-		//	e.windowMove.x = winRect.left;
-		//	e.windowMove.y = winRect.top;
-		//	eventManager.submitEvent(e);
-		//}
 	}
 	break;
 	case WM_LBUTTONDOWN:
@@ -208,11 +197,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	return RegisterClass(&wc);
 }
 
-Result ShellOS::init(DisplayAttributes& /*data*/)
+bool ShellOS::init(DisplayAttributes& /*data*/)
 {
 	if (!_OSImplementation)
 	{
-		return Result::UnknownError;
+		return false;
 	}
 
 	// Register our class.
@@ -220,11 +209,11 @@ Result ShellOS::init(DisplayAttributes& /*data*/)
 
 	// Construct our read and write path.
 	{
-		char8 moduleFilename[MAX_PATH] = "";
+		char moduleFilename[MAX_PATH] = "";
 
 		if (GetModuleFileName(NULL, moduleFilename, sizeof(moduleFilename) - 1) == 0)
 		{
-			return Result::UnknownError;
+			return false;
 		}
 
 		FilePath filepath(moduleFilename);
@@ -236,10 +225,10 @@ Result ShellOS::init(DisplayAttributes& /*data*/)
 		_ReadPaths.push_back(filepath.getDirectory() + FilePath::getDirectorySeparator() + "Assets" + FilePath::getDirectorySeparator());
 	}
 
-	return Result::Success;
+	return true;
 }
 
-Result ShellOS::initializeWindow(DisplayAttributes& data)
+bool ShellOS::initializeWindow(DisplayAttributes& data)
 {
 	HWND		hWnd;
 	POINT		p;
@@ -281,13 +270,6 @@ Result ShellOS::initializeWindow(DisplayAttributes& data)
 	}
 	else
 	{
-		// Reduce the window size until it fits on screen
-		//while ((data.width > static_cast<int32>(sMInfo.rcMonitor.right - sMInfo.rcMonitor.left)) || (data.height > static_cast<int32>(sMInfo.rcMonitor.bottom - sMInfo.rcMonitor.top)))
-		//{
-		//	data.width >>= 1;
-		//	data.height >>= 1;
-		//}
-
 		int x, y;
 
 		SetRect(&winRect, 0, 0, data.width, data.height);
@@ -317,7 +299,7 @@ Result ShellOS::initializeWindow(DisplayAttributes& data)
 
 	if (!hWnd)
 	{
-		return Result::UnknownError;
+		return false;
 	}
 
 	ShowWindow(hWnd, static_cast<WindowsOSData*>(_OSImplementation->osdata)->cmdShow);
@@ -327,7 +309,7 @@ Result ShellOS::initializeWindow(DisplayAttributes& data)
 	_OSImplementation->hWnd = hWnd;
 	_OSImplementation->hDC = GetDC(hWnd);
 
-	return Result::Success;
+	return true;
 }
 
 void ShellOS::releaseWindow()
@@ -356,7 +338,7 @@ OSWindow ShellOS::getWindow() const
 	return _OSImplementation->hWnd;
 }
 
-Result ShellOS::handleOSEvents()
+bool ShellOS::handleOSEvents()
 {
 	MSG	msg;
 
@@ -367,7 +349,7 @@ Result ShellOS::handleOSEvents()
 		DispatchMessage(&msg);
 	}
 
-	return Result::Success;
+	return true;
 }
 
 bool ShellOS::isInitialized()
@@ -375,15 +357,19 @@ bool ShellOS::isInitialized()
 	return _OSImplementation && _OSImplementation->hDC;
 }
 
-Result ShellOS::popUpMessage(const char8* const title, const char8* const message, ...) const
+bool ShellOS::popUpMessage(const char* title, const char* message, ...) const
 {
-	if (!title && !message)
+	if (!title)
 	{
-		return Result::NoData;
+		title = "";
+	}
+	if (!message)
+	{
+		message = "";
 	}
 
 	va_list arg;
-	char8 buf[1024];
+	char buf[1024];
 	memset(buf, 0, sizeof(buf));
 
 	va_start(arg, message);
@@ -394,8 +380,7 @@ Result ShellOS::popUpMessage(const char8* const title, const char8* const messag
 #endif
 	va_end(arg);
 
-	MessageBox(NULL, buf, title, MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND);
-	return Result::Success;
+	return (MessageBox(NULL, buf, title, MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND) != 0);
 }
 }
 }

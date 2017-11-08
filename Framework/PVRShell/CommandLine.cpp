@@ -25,7 +25,7 @@ CommandLineParser::CommandLineParser() : _data(0)
 }
 
 // prefix, Set, Append methods
-void CommandLineParser::prefix(const wchar* pwCmdLine)
+void CommandLineParser::prefix(const wchar_t* pwCmdLine)
 {
 	if (_commandLine._options.size())
 	{
@@ -40,7 +40,7 @@ void CommandLineParser::prefix(const wchar* pwCmdLine)
 
 }
 
-void CommandLineParser::prefix(int argc, char8** argv)
+void CommandLineParser::prefix(int argc, char** argv)
 {
 	if (_commandLine._options.size())
 	{
@@ -55,7 +55,7 @@ void CommandLineParser::prefix(int argc, char8** argv)
 
 }
 
-void CommandLineParser::prefix(const char8* pCmdLine)
+void CommandLineParser::prefix(const char* pCmdLine)
 {
 	if (_commandLine._options.size())
 	{
@@ -131,12 +131,12 @@ void CommandLineParser::set(const wchar_t* pwCmdLine)
 
 	size_t length = wcslen(pwCmdLine) + 1;
 
-	std::vector<char8> tmp; tmp.resize(length);
+	std::vector<char> tmp; tmp.resize(length);
 
 	while (length)
 	{
 		--length;
-		tmp[length] = static_cast<char8>(pwCmdLine[length]);
+		tmp[length] = static_cast<char>(pwCmdLine[length]);
 	}
 
 	parseCmdLine(tmp.data());
@@ -193,7 +193,7 @@ void CommandLineParser::set(Stream* const stream)
 
 	if (size)
 	{
-		std::vector<byte> tmp; tmp.resize(size + 1);
+		std::vector<char> tmp; tmp.resize(size + 1);
 
 		size_t dataRead;
 		stream->read(1, size, tmp.data(), dataRead);
@@ -216,7 +216,7 @@ void CommandLineParser::set(Stream* const stream)
 
 		tmp[i] = '\0';
 
-		set((char8*)tmp.data());
+		set(static_cast<char*>(tmp.data()));
 
 	}
 }
@@ -320,7 +320,7 @@ void CommandLineParser::append(const CommandLineParser& commandLine)
 	_commandLine._options = newOptions;
 }
 
-void CommandLineParser::parseCmdLine(const char8* const commandLine)
+void CommandLineParser::parseCmdLine(const char* const commandLine)
 {
 	size_t		len;
 	int			nIn, nOut;
@@ -411,7 +411,7 @@ void CommandLineParser::parseArgV(char* const pStr)
 	opt.arg = pStr;
 	if (pStr[j])
 	{
-		// terminate the arg string, set value string
+		// terminate the arg std::string, set value std::string
 		pStr[j] = 0;
 		opt.val = &pStr[j + 1];
 	}
@@ -430,9 +430,9 @@ const CommandLineParser::ParsedCommandLine& CommandLineParser::getParsedCommandL
 	return _commandLine;
 }
 
-uint32 CommandLineParser::findArg(const char* arg) const
+uint32_t CommandLineParser::findArg(const char* arg) const
 {
-	uint32 i;
+	uint32_t i;
 
 	/*
 		Find an argument, case insensitive. Returns the index of the option
@@ -451,7 +451,7 @@ uint32 CommandLineParser::findArg(const char* arg) const
 
 bool CommandLineParser::readFlag(const char* arg, bool& bVal) const
 {
-	uint32 nIdx = findArg(arg);
+	uint32_t nIdx = findArg(arg);
 
 	if (nIdx == _commandLine._options.size())
 	{
@@ -467,7 +467,7 @@ bool CommandLineParser::readFlag(const char* arg, bool& bVal) const
 
 bool CommandLineParser::readUint(const char* arg, unsigned int& uiVal) const
 {
-	uint32 nIdx = findArg(arg);
+	uint32_t nIdx = findArg(arg);
 
 	if (nIdx == _commandLine._options.size())
 	{
@@ -482,7 +482,7 @@ bool CommandLineParser::readUint(const char* arg, unsigned int& uiVal) const
 
 bool CommandLineParser::readFloat(const char* arg, float& fVal) const
 {
-	uint32 nIdx = findArg(arg);
+	uint32_t nIdx = findArg(arg);
 
 	if (nIdx == _commandLine._options.size())
 	{
@@ -507,14 +507,14 @@ bool CommandLineParser::ParsedCommandLine::getStringOption(const char* name, std
 	return true;
 }
 
-bool CommandLineParser::ParsedCommandLine::getFloatOption(const char* name, float32& outValue) const
+bool CommandLineParser::ParsedCommandLine::getFloatOption(const char* name, float& outValue) const
 {
 	auto it = std::find(_options.begin(), _options.end(), name);
 	if (it == _options.end()) { return false; }
-	outValue = (float32)atof(it->val);
+	outValue = static_cast<float>(atof(it->val));
 	return true;
 }
-bool CommandLineParser::ParsedCommandLine::getIntOption(const char* name, int32& outValue) const
+bool CommandLineParser::ParsedCommandLine::getIntOption(const char* name, int32_t& outValue) const
 {
 	auto it = std::find(_options.begin(), _options.end(), name);
 	if (it == _options.end()) { return false; }
